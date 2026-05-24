@@ -1,9 +1,9 @@
-**//Создание схемы raw_data//**
+/*Создание схемы raw_data */
   
 create schema raw_data;
 
-**// Создание дочерней таблицы в схему raw_data//**
-  
+/* Создание дочерней таблицы в схему raw_data */
+
 create table raw_data.sales (
 id smallint,
 auto varchar,
@@ -16,14 +16,15 @@ discount smallint,
 brand_origin text
 );
 
-**//Копирование таблицы из csv //**
+/*Копирование таблицы из csv */
   
 \copy raw_data.sales(id, auto, gasoline_consumption, price, date, person, phone, discount, brand_origin) from 'C:\temp\cars.csv' CSV header null as 'null';
 
-**//Создание схемы //**
+/*Создание схемы */
+
 create schema car_shop;
 
-**//Создание таблиц в схему car_shop//**
+/*Создание таблиц в схему car_shop */
 
 create table car_shop.persons (
 id SERIAL primary key, /* уникальный id*/
@@ -64,8 +65,7 @@ date DATE not null, /* дата продажи это формат дата */
 discount smallint DEFAULT 0 /* этот формат так как он по памяти экономнее чем int, также указала значение по умолчанию 0 */
 );
 
-**//Добавление данных в таблицы из таблицы raw_data.sales в таблицы схемы car_shop//**
-  
+/*Добавление данных в таблицы из таблицы raw_data.sales в таблицы схемы car_shop */
 insert into car_shop.colors (color_id, color_name)
 select 
 	row_number() over (order by color_name),
@@ -121,14 +121,14 @@ select
 	discount
 from raw_data.sales;
 
-**//При добавлении данных в таблицу car_shop.sales скрипт выполнялся, но данные не добавлялись. Погуглила в интеренете проверила на корректность. проверка показала, что данные в таблицах выше корректны(нет пробелов и т.д)
-  решила сформировать дополнительные ячейки в таблице raw_data.sales которые будут формировать нужные ID из сформированных таблиц и их id //**
+/*При добавлении данных в таблицу car_shop.sales скрипт выполнялся, но данные не добавлялись. Погуглила в интеренете проверила на корректность. проверка показала, что данные в таблицах выше корректны(нет пробелов и т.д)
+  решила сформировать дополнительные ячейки в таблице raw_data.sales которые будут формировать нужные ID из сформированных таблиц и их id */
 
 ALTER TABLE raw_data.sales ADD COLUMN IF NOT EXISTS tmp_person_id INT;
 ALTER TABLE raw_data.sales ADD COLUMN IF NOT EXISTS tmp_model_id INT;
 ALTER TABLE raw_data.sales ADD COLUMN IF NOT EXISTS tmp_color_id INT;
 
-**// Здесь наполняю вновь созданные колонки данными //**
+/* Здесь наполняю вновь созданные колонки данными //**
   
 UPDATE raw_data.sales raw
 SET tmp_person_id = p.person_id
@@ -147,7 +147,7 @@ JOIN car_shop.models m ON m.brand_id = b.brand_id
 WHERE b.brand_name = TRIM(SPLIT_PART(SPLIT_PART(raw.auto, ',', 1), ' ', 1))
   AND m.model_name = TRIM(REGEXP_REPLACE(SPLIT_PART(raw.auto, ',', 1), '^[^\s]+\s*', ''));
 
-**// Теперь наполнение таблицы car_shop.sales выполнено //**
+/* Теперь наполнение таблицы car_shop.sales выполнено */
   
 INSERT INTO car_shop.sales (id, person_id, model_id, color_id, deal_id)
 SELECT 
@@ -160,9 +160,9 @@ FROM raw_data.sales;
 	
 
 
-**// Задания по таблице //*
+/* Задания по таблице */
 
-  **// Задание 1 //*
+  /* Задание 1 */
   
 select 
 round(
@@ -170,7 +170,7 @@ round(
 	as nulls_percentage_gasoline_consumption 
 from car_shop.models;
  
-**// Задание 2 //*
+/* Задание 2 */
   
 select 
 	b.brand_name,
@@ -187,7 +187,7 @@ order by
 	b.brand_name asc,
 	year asc;
 
- **// Задание 3 //*
+ /* Задание 3 */
 
 select 
 	extract(month from dc.date):: int as month,
@@ -202,7 +202,7 @@ group by
 order by 
 	month asc;
 
- **// Задание 4 //*
+ /* Задание 4 */
 
 select 
 	p.person_name as person,
@@ -216,7 +216,7 @@ group by
 order by
 	person asc;
 
- **// Задание 5 //*
+ /* Задание 5 */
 
 select 
 	b.brand_origin,
@@ -229,7 +229,7 @@ join car_shop.deal_condithions dc using (deal_id)
 group by 
 	b.brand_origin;
 
- **// Задание 6 //*
+ /* Задание 6 */
    
 select 
 	count(*) as persons_from_usa_count
